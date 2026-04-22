@@ -1,4 +1,4 @@
-# 🚀 AutoML Dashboard
+# AutoML Dashboard
 
 An end-to-end **Automated Machine Learning** web application built with Python and Streamlit. Upload any tabular dataset, and the pipeline automatically handles preprocessing, model selection, hyperparameter tuning, and deployment — no code required.
 
