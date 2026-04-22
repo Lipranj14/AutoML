@@ -32,7 +32,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("Auto-ML Dashboard Pro")
+st.title("Auto-ML Dashboard")
 st.markdown("Advanced Preprocessing, Automated Cross-Validation, & Explainable AI.")
 
 # ── Helper: build evaluation charts from y_test / y_pred ─────────────────────
