@@ -15,8 +15,8 @@ env/
 # Model files (users download these manually via the app)
 *.pkl
 
-# Streamlit cache
-.streamlit/
+# Streamlit — track config.toml but not secrets
+.streamlit/secrets.toml
 
 # OS files
 .DS_Store

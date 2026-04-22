@@ -1,63 +1,97 @@
-# 🚀 AutoML Dashboard
+# AutoML Dashboard
 
-An end-to-end **Automated Machine Learning** web application built with Python and Streamlit. Upload any tabular dataset, and the pipeline automatically handles preprocessing, model selection, hyperparameter tuning, and deployment — no code required.
+<div align="center">
+
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-2.0%2B-189AB4)](https://xgboost.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://lipranj14-automl.streamlit.app)
+
+**An end-to-end Automated Machine Learning web application — upload any tabular dataset and get a production-ready model with zero code.**
+
+[Live Demo](https://lipranj14-automl.streamlit.app) · [Report a Bug](https://github.com/Lipranj14/AutoML/issues) · [Request Feature](https://github.com/Lipranj14/AutoML/issues)
+
+</div>
 
 ---
 
-## ✨ Features
+## Overview
 
-### 🏋️ Training Pipeline
-- **Auto task detection** — automatically identifies Classification or Regression problems
-- **Data Quality Report** — detects missing values, outliers (IQR), class imbalance, and potential target leakage
-- **Model Zoo** — benchmarks 5 algorithms using 3-fold cross-validation:
-  - Logistic / Linear Regression
-  - Random Forest
-  - XGBoost
-  - SVM (SVC / SVR)
-  - K-Nearest Neighbors
-- **Hyperparameter Tuning** — `RandomizedSearchCV` on the best model
-- **Feature Importance** visualization (bar chart)
-- **Full Evaluation on Hold-out Test Set**:
-  - Classification → Accuracy, F1, ROC-AUC, Confusion Matrix, ROC Curve, Per-class Report
-  - Regression → RMSE, MAE, MSE, R², Actual vs Predicted, Residuals Distribution
-- **Model Download** — serialized to memory, downloaded only on user request (nothing saved to disk automatically)
+AutoML Dashboard automates the entire machine learning workflow for tabular data. From raw CSV upload to a downloadable trained model, the pipeline handles everything — preprocessing, model selection, hyperparameter tuning, and evaluation — through an interactive web interface.
 
-### 🔎 What-If Single Predictor
-- Dynamically generated input form based on training schema
-- Instant predictions with confidence scores and class probability bar chart
+**No ML knowledge required. No code. Just upload and go.**
 
-### 📦 Batch Prediction
-- Upload any `.pkl` model + a new dataset
-- Automatic schema validation
-- Prediction analytics:
-  - Classification → Prediction Summary table (count, %, avg/min/max confidence)
-  - Regression → Mean, Median, Max, Min metric cards
+---
+
+## Features
+
+### Training Pipeline
+- **Auto task detection** — automatically detects Classification vs Regression
+- **Data Quality Report** — scans for missing values, outliers (IQR), class imbalance, and target leakage
+- **5-Model Zoo** benchmarked via 3-fold cross-validation:
+
+  | Task | Models |
+  |------|--------|
+  | Classification | Logistic Regression, Random Forest, XGBoost, SVC, KNN |
+  | Regression | Linear Regression, Random Forest, XGBoost, SVR, KNN |
+
+- **Automated Hyperparameter Tuning** via `RandomizedSearchCV` on the best model
+- **Feature Importance** bar chart (top 15 features)
+- **Full Hold-out Evaluation** on 20% test split:
+
+  | Classification | Regression |
+  |---|---|
+  | Accuracy, F1-Score, ROC-AUC | RMSE, MAE, MSE, R² |
+  | Confusion Matrix (normalised) | Actual vs Predicted scatter |
+  | Per-class Classification Report | Residuals Distribution |
+  | ROC Curve (binary problems) | |
+
+- **On-demand Model Download** — model serialized in memory, nothing written to disk until you click Download
+
+### What-If Single Predictor
+- Dynamic form auto-generated from the training schema
+- Instant prediction with confidence scores
+- Class probability bar chart (classification)
+
+### Batch Prediction
+- Upload a `.pkl` model + any new dataset
+- Automatic schema validation — catches missing columns before inference
+- **Prediction Analytics**: summary table with count, percentage, and confidence stats
 - Download results as CSV
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 AutoML/
-├── app.py              # Streamlit frontend — all 3 tabs
-├── automl_core.py      # ML pipeline: preprocessing, training, evaluation
-├── requirements.txt    # Python dependencies
+├── app.py                  # Streamlit UI — Training, What-If, Batch tabs
+├── automl_core.py          # Core ML pipeline (preprocessing, training, evaluation)
+├── requirements.txt        # Python dependencies with version pins
+├── .streamlit/
+│   └── config.toml         # Streamlit dark theme & server config
+├── LICENSE
 └── .gitignore
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## Getting Started
 
-### 1. Clone the repository
+### Prerequisites
+- Python 3.9 or higher
+- pip
+
+### Installation
+
 ```bash
+# 1. Clone the repository
 git clone https://github.com/Lipranj14/AutoML.git
 cd AutoML
-```
 
-### 2. Create a virtual environment (recommended)
-```bash
+# 2. Create and activate a virtual environment
 python -m venv .venv
 
 # Windows
@@ -65,69 +99,100 @@ python -m venv .venv
 
 # macOS / Linux
 source .venv/bin/activate
-```
 
-### 3. Install dependencies
-```bash
+# 3. Install dependencies
 pip install -r requirements.txt
-```
 
-### 4. Run the app
-```bash
+# 4. Launch the app
 streamlit run app.py
 ```
 
-The dashboard will open at `http://localhost:8501`
+Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ---
 
-## 🧪 Usage
+## Usage Guide
 
-### Training a Model
+### Step 1 — Train a Model
 1. Go to the **Training Pipeline** tab
 2. Upload a `.csv` or `.xlsx` dataset
 3. Select the target column
 4. Click **Start Auto-ML Pipeline**
-5. Review metrics, feature importances, and evaluation charts
-6. Download the trained model as a `.pkl` file
+5. Review the leaderboard, metrics, and evaluation charts
+6. Click **Download Versioned Model (.pkl)** to save the model
 
-### Batch Predictions
+### Step 2 — Run Batch Predictions
 1. Go to the **Batch Prediction** tab
-2. Upload the downloaded `.pkl` model
-3. Upload a new dataset (must have the same feature columns)
+2. Upload the `.pkl` model you downloaded
+3. Upload a new dataset with the same feature columns
 4. Click **Generate Predictions**
-5. Download the results as CSV
+5. Download the predictions as CSV
 
-### What-If Analysis
-1. Train a model first in the Training Pipeline tab
-2. Go to the **What-If Predictor** tab
-3. Fill in feature values and click **Predict**
+### Step 3 — What-If Analysis
+1. After training, go to the **What-If Predictor** tab
+2. Enter individual feature values
+3. Click **Predict** for an instant result with confidence
 
 ---
 
-## 📦 Supported File Formats
+## Deployment
 
-| Input | Formats |
+This app is deployed on **Streamlit Community Cloud** (free hosting for public GitHub repos).
+
+### Deploy your own instance
+
+1. Fork this repository
+2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub
+3. Click **New app**
+4. Select your forked repo, branch `main`, and main file `app.py`
+5. Click **Deploy** — live in ~2 minutes
+
+> No server setup, no Docker, no cloud account needed.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
 |---|---|
-| Training Data | `.csv`, `.xlsx` |
-| Prediction Data | `.csv`, `.xlsx` |
+| Frontend / UI | [Streamlit](https://streamlit.io/) |
+| ML Framework | [scikit-learn](https://scikit-learn.org/), [XGBoost](https://xgboost.readthedocs.io/) |
+| Data Processing | [pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/) |
+| Visualization | [Plotly](https://plotly.com/python/) |
+| Model Serialization | [joblib](https://joblib.readthedocs.io/) |
+
+---
+
+## Supported Formats
+
+| Input | Accepted Formats |
+|---|---|
+| Training / Prediction Data | `.csv`, `.xlsx` |
 | Model File | `.pkl` |
-| Prediction Output | `.csv` |
+| Prediction Output | `.csv` (download) |
 
 ---
 
-## 🛠️ Tech Stack
+## Contributing
 
-| Layer | Library |
-|---|---|
-| Frontend | Streamlit |
-| ML Pipeline | scikit-learn, XGBoost |
-| Data | pandas, NumPy |
-| Visualization | Plotly |
-| Serialization | joblib |
+Contributions are welcome! To contribute:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m "Add your feature"`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Open a Pull Request
+
+Please open an issue first to discuss any significant changes.
 
 ---
 
-## 📄 License
+## License
 
-This project is open-source and available under the [MIT License](LICENSE).
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+Made with Streamlit & scikit-learn
+</div>
