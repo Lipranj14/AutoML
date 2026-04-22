@@ -94,46 +94,59 @@ def get_models(problem_type, is_imbalanced):
     cw = 'balanced' if is_imbalanced else None
     if problem_type == 'classification':
         return {
-            'Logistic Regression': (LogisticRegression(max_iter=1000, class_weight=cw), {
-                'classifier__C': [0.1, 1.0, 10.0]
+            'Logistic Regression': (LogisticRegression(max_iter=2000, class_weight=cw), {
+                'classifier__C': [0.01, 0.1, 1.0, 10.0, 100.0],
+                'classifier__solver': ['lbfgs', 'liblinear']
             }),
             'Random Forest': (RandomForestClassifier(random_state=42, class_weight=cw), {
-                'classifier__n_estimators': [50, 100],
-                'classifier__max_depth': [None, 10, 20]
+                'classifier__n_estimators': [50, 100, 200, 300],
+                'classifier__max_depth': [None, 10, 20, 30],
+                'classifier__min_samples_split': [2, 5, 10],
+                'classifier__min_samples_leaf': [1, 2, 4]
             }),
             'XGBoost': (XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'), {
-                'classifier__n_estimators': [50, 100],
-                'classifier__learning_rate': [0.01, 0.1],
-                'classifier__max_depth': [3, 5]
+                'classifier__n_estimators': [50, 100, 200, 300],
+                'classifier__learning_rate': [0.01, 0.05, 0.1, 0.2],
+                'classifier__max_depth': [3, 5, 7, 9],
+                'classifier__subsample': [0.6, 0.8, 1.0],
+                'classifier__colsample_bytree': [0.6, 0.8, 1.0]
             }),
             'SVC': (SVC(probability=True, class_weight=cw, random_state=42), {
-                'classifier__C': [0.1, 1.0, 10.0],
-                'classifier__kernel': ['linear', 'rbf']
+                'classifier__C': [0.1, 1.0, 10.0, 100.0],
+                'classifier__kernel': ['linear', 'rbf', 'poly'],
+                'classifier__gamma': ['scale', 'auto', 0.1, 0.01]
             }),
             'K-Nearest Neighbors': (KNeighborsClassifier(), {
-                'classifier__n_neighbors': [3, 5, 7],
-                'classifier__weights': ['uniform', 'distance']
+                'classifier__n_neighbors': [3, 5, 7, 9, 11],
+                'classifier__weights': ['uniform', 'distance'],
+                'classifier__p': [1, 2]
             })
         }
     else:
         return {
             'Linear Regression': (LinearRegression(), {}),
             'Random Forest': (RandomForestRegressor(random_state=42), {
-                'regressor__n_estimators': [50, 100],
-                'regressor__max_depth': [None, 10, 20]
+                'regressor__n_estimators': [50, 100, 200, 300],
+                'regressor__max_depth': [None, 10, 20, 30],
+                'regressor__min_samples_split': [2, 5, 10],
+                'regressor__min_samples_leaf': [1, 2, 4]
             }),
             'XGBoost': (XGBRegressor(random_state=42), {
-                'regressor__n_estimators': [50, 100],
-                'regressor__learning_rate': [0.01, 0.1],
-                'regressor__max_depth': [3, 5]
+                'regressor__n_estimators': [50, 100, 200, 300],
+                'regressor__learning_rate': [0.01, 0.05, 0.1, 0.2],
+                'regressor__max_depth': [3, 5, 7, 9],
+                'regressor__subsample': [0.6, 0.8, 1.0],
+                'regressor__colsample_bytree': [0.6, 0.8, 1.0]
             }),
             'SVR': (SVR(), {
-                'regressor__C': [0.1, 1.0, 10.0],
-                'regressor__kernel': ['linear', 'rbf']
+                'regressor__C': [0.1, 1.0, 10.0, 100.0],
+                'regressor__kernel': ['linear', 'rbf', 'poly'],
+                'regressor__gamma': ['scale', 'auto', 0.1, 0.01]
             }),
             'K-Nearest Neighbors': (KNeighborsRegressor(), {
-                'regressor__n_neighbors': [3, 5, 7],
-                'regressor__weights': ['uniform', 'distance']
+                'regressor__n_neighbors': [3, 5, 7, 9, 11],
+                'regressor__weights': ['uniform', 'distance'],
+                'regressor__p': [1, 2]
             })
         }
 
@@ -223,7 +236,7 @@ def run_automl(df, target_col, progress_callback=None):
     
     start_time = time.time()
     if best_param_grid:
-        search = RandomizedSearchCV(best_pipeline, param_distributions=best_param_grid, n_iter=5, cv=3, scoring=scoring_metric, random_state=42, n_jobs=-1)
+        search = RandomizedSearchCV(best_pipeline, param_distributions=best_param_grid, n_iter=15, cv=3, scoring=scoring_metric, random_state=42, n_jobs=-1)
         search.fit(X_train, y_train)
         final_best_pipe = search.best_estimator_
     else:
