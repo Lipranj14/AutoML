@@ -4,9 +4,9 @@ An end-to-end **Automated Machine Learning** web application built with Python a
 
 ---
 
-## ✨ Features
+##  Features
 
-### 🏋️ Training Pipeline
+### Training Pipeline
 - **Auto task detection** — automatically identifies Classification or Regression problems
 - **Data Quality Report** — detects missing values, outliers (IQR), class imbalance, and potential target leakage
 - **Model Zoo** — benchmarks 5 algorithms using 3-fold cross-validation:
@@ -22,11 +22,11 @@ An end-to-end **Automated Machine Learning** web application built with Python a
   - Regression → RMSE, MAE, MSE, R², Actual vs Predicted, Residuals Distribution
 - **Model Download** — serialized to memory, downloaded only on user request (nothing saved to disk automatically)
 
-### 🔎 What-If Single Predictor
+###  What-If Single Predictor
 - Dynamically generated input form based on training schema
 - Instant predictions with confidence scores and class probability bar chart
 
-### 📦 Batch Prediction
+### Batch Prediction
 - Upload any `.pkl` model + a new dataset
 - Automatic schema validation
 - Prediction analytics:
@@ -36,7 +36,7 @@ An end-to-end **Automated Machine Learning** web application built with Python a
 
 ---
 
-## 🗂️ Project Structure
+##  Project Structure
 
 ```
 AutoML/
@@ -46,42 +46,7 @@ AutoML/
 └── .gitignore
 ```
 
----
-
-## ⚙️ Installation & Setup
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/Lipranj14/AutoML.git
-cd AutoML
-```
-
-### 2. Create a virtual environment (recommended)
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the app
-```bash
-streamlit run app.py
-```
-
-The dashboard will open at `http://localhost:8501`
-
----
-
-## 🧪 Usage
+##  Usage
 
 ### Training a Model
 1. Go to the **Training Pipeline** tab
@@ -105,7 +70,7 @@ The dashboard will open at `http://localhost:8501`
 
 ---
 
-## 📦 Supported File Formats
+##  Supported File Formats
 
 | Input | Formats |
 |---|---|
@@ -116,7 +81,7 @@ The dashboard will open at `http://localhost:8501`
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Library |
 |---|---|
