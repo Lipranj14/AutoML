@@ -7,11 +7,11 @@
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-2.0%2B-189AB4)](https://xgboost.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://lipranj14-automl.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://automl-lipranj-daharwal.streamlit.app/)
 
 **An end-to-end Automated Machine Learning web application — upload any tabular dataset and get a production-ready model with zero code.**
 
-[Live Demo](https://lipranj14-automl.streamlit.app) · [Report a Bug](https://github.com/Lipranj14/AutoML/issues) · [Request Feature](https://github.com/Lipranj14/AutoML/issues)
+[Live Demo](https://automl-lipranj-daharwal.streamlit.app/) · [Report a Bug](https://github.com/Lipranj14/AutoML/issues) · [Request Feature](https://github.com/Lipranj14/AutoML/issues)
 
 </div>
 
