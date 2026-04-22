@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Model files (downloaded manually by user)
+*.pkl
+
+# Streamlit cache
+.streamlit/
