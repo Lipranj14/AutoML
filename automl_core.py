@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import time
 from datetime import datetime
+import optuna
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -94,61 +96,119 @@ def get_models(problem_type, is_imbalanced):
     cw = 'balanced' if is_imbalanced else None
     if problem_type == 'classification':
         return {
-            'Logistic Regression': (LogisticRegression(max_iter=2000, class_weight=cw), {
-                'classifier__C': [0.01, 0.1, 1.0, 10.0, 100.0],
-                'classifier__solver': ['lbfgs', 'liblinear']
-            }),
-            'Random Forest': (RandomForestClassifier(random_state=42, class_weight=cw), {
-                'classifier__n_estimators': [50, 100, 200, 300],
-                'classifier__max_depth': [None, 10, 20, 30],
-                'classifier__min_samples_split': [2, 5, 10],
-                'classifier__min_samples_leaf': [1, 2, 4]
-            }),
-            'XGBoost': (XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'), {
-                'classifier__n_estimators': [50, 100, 200, 300],
-                'classifier__learning_rate': [0.01, 0.05, 0.1, 0.2],
-                'classifier__max_depth': [3, 5, 7, 9],
-                'classifier__subsample': [0.6, 0.8, 1.0],
-                'classifier__colsample_bytree': [0.6, 0.8, 1.0]
-            }),
-            'SVC': (SVC(probability=True, class_weight=cw, random_state=42), {
-                'classifier__C': [0.1, 1.0, 10.0, 100.0],
-                'classifier__kernel': ['linear', 'rbf', 'poly'],
-                'classifier__gamma': ['scale', 'auto', 0.1, 0.01]
-            }),
-            'K-Nearest Neighbors': (KNeighborsClassifier(), {
-                'classifier__n_neighbors': [3, 5, 7, 9, 11],
-                'classifier__weights': ['uniform', 'distance'],
-                'classifier__p': [1, 2]
-            })
+            'Logistic Regression': LogisticRegression(max_iter=1000, class_weight=cw),
+            'Random Forest': RandomForestClassifier(random_state=42, class_weight=cw),
+            'XGBoost': XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'),
+            'SVC': SVC(probability=True, class_weight=cw, random_state=42),
+            'K-Nearest Neighbors': KNeighborsClassifier()
         }
     else:
         return {
-            'Linear Regression': (LinearRegression(), {}),
-            'Random Forest': (RandomForestRegressor(random_state=42), {
-                'regressor__n_estimators': [50, 100, 200, 300],
-                'regressor__max_depth': [None, 10, 20, 30],
-                'regressor__min_samples_split': [2, 5, 10],
-                'regressor__min_samples_leaf': [1, 2, 4]
-            }),
-            'XGBoost': (XGBRegressor(random_state=42), {
-                'regressor__n_estimators': [50, 100, 200, 300],
-                'regressor__learning_rate': [0.01, 0.05, 0.1, 0.2],
-                'regressor__max_depth': [3, 5, 7, 9],
-                'regressor__subsample': [0.6, 0.8, 1.0],
-                'regressor__colsample_bytree': [0.6, 0.8, 1.0]
-            }),
-            'SVR': (SVR(), {
-                'regressor__C': [0.1, 1.0, 10.0, 100.0],
-                'regressor__kernel': ['linear', 'rbf', 'poly'],
-                'regressor__gamma': ['scale', 'auto', 0.1, 0.01]
-            }),
-            'K-Nearest Neighbors': (KNeighborsRegressor(), {
-                'regressor__n_neighbors': [3, 5, 7, 9, 11],
-                'regressor__weights': ['uniform', 'distance'],
-                'regressor__p': [1, 2]
-            })
+            'Linear Regression': LinearRegression(),
+            'Random Forest': RandomForestRegressor(random_state=42),
+            'XGBoost': XGBRegressor(random_state=42),
+            'SVR': SVR(),
+            'K-Nearest Neighbors': KNeighborsRegressor()
         }
+
+def tune_model_optuna(best_model_name, problem_type, X_train, y_train, preprocessor, is_imbalanced, scoring_metric, n_trials=15):
+    cw = 'balanced' if is_imbalanced else None
+    step_name = 'classifier' if problem_type == 'classification' else 'regressor'
+    
+    def objective(trial):
+        if problem_type == 'classification':
+            if best_model_name == 'Logistic Regression':
+                C = trial.suggest_float('C', 0.01, 100.0, log=True)
+                solver = trial.suggest_categorical('solver', ['lbfgs', 'liblinear'])
+                model = LogisticRegression(max_iter=2000, class_weight=cw, C=C, solver=solver)
+            elif best_model_name == 'Random Forest':
+                n_estimators = trial.suggest_int('n_estimators', 50, 300)
+                max_depth = trial.suggest_categorical('max_depth', [None, 10, 20, 30])
+                min_samples_split = trial.suggest_int('min_samples_split', 2, 10)
+                min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 4)
+                model = RandomForestClassifier(random_state=42, class_weight=cw, n_estimators=n_estimators, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf)
+            elif best_model_name == 'XGBoost':
+                n_estimators = trial.suggest_int('n_estimators', 50, 300)
+                learning_rate = trial.suggest_float('learning_rate', 0.01, 0.2, log=True)
+                max_depth = trial.suggest_int('max_depth', 3, 9)
+                subsample = trial.suggest_float('subsample', 0.6, 1.0)
+                colsample_bytree = trial.suggest_float('colsample_bytree', 0.6, 1.0)
+                model = XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss', n_estimators=n_estimators, learning_rate=learning_rate, max_depth=max_depth, subsample=subsample, colsample_bytree=colsample_bytree)
+            elif best_model_name == 'SVC':
+                C = trial.suggest_float('C', 0.1, 100.0, log=True)
+                kernel = trial.suggest_categorical('kernel', ['linear', 'rbf', 'poly'])
+                model = SVC(probability=True, class_weight=cw, random_state=42, C=C, kernel=kernel)
+            else: # KNN
+                n_neighbors = trial.suggest_int('n_neighbors', 3, 11, step=2)
+                weights = trial.suggest_categorical('weights', ['uniform', 'distance'])
+                p = trial.suggest_int('p', 1, 2)
+                model = KNeighborsClassifier(n_neighbors=n_neighbors, weights=weights, p=p)
+        else: # regression
+            if best_model_name == 'Linear Regression':
+                model = LinearRegression()
+            elif best_model_name == 'Random Forest':
+                n_estimators = trial.suggest_int('n_estimators', 50, 300)
+                max_depth = trial.suggest_categorical('max_depth', [None, 10, 20, 30])
+                min_samples_split = trial.suggest_int('min_samples_split', 2, 10)
+                min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 4)
+                model = RandomForestRegressor(random_state=42, n_estimators=n_estimators, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf)
+            elif best_model_name == 'XGBoost':
+                n_estimators = trial.suggest_int('n_estimators', 50, 300)
+                learning_rate = trial.suggest_float('learning_rate', 0.01, 0.2, log=True)
+                max_depth = trial.suggest_int('max_depth', 3, 9)
+                subsample = trial.suggest_float('subsample', 0.6, 1.0)
+                colsample_bytree = trial.suggest_float('colsample_bytree', 0.6, 1.0)
+                model = XGBRegressor(random_state=42, n_estimators=n_estimators, learning_rate=learning_rate, max_depth=max_depth, subsample=subsample, colsample_bytree=colsample_bytree)
+            elif best_model_name == 'SVR':
+                C = trial.suggest_float('C', 0.1, 100.0, log=True)
+                kernel = trial.suggest_categorical('kernel', ['linear', 'rbf', 'poly'])
+                model = SVR(C=C, kernel=kernel)
+            else: # KNN
+                n_neighbors = trial.suggest_int('n_neighbors', 3, 11, step=2)
+                weights = trial.suggest_categorical('weights', ['uniform', 'distance'])
+                p = trial.suggest_int('p', 1, 2)
+                model = KNeighborsRegressor(n_neighbors=n_neighbors, weights=weights, p=p)
+
+        pipeline = Pipeline(steps=[('preprocessor', preprocessor), (step_name, model)])
+        cv_scores = cross_val_score(pipeline, X_train, y_train, cv=3, scoring=scoring_metric, n_jobs=-1)
+        return cv_scores.mean() if problem_type == 'classification' else -cv_scores.mean()
+
+    # Create Optuna study
+    direction = 'maximize' if problem_type == 'classification' else 'minimize'
+    # For models with no hyperparams like Linear Regression, skip tuning
+    if best_model_name == 'Linear Regression':
+        pipe = Pipeline(steps=[('preprocessor', preprocessor), (step_name, LinearRegression())])
+        return pipe.fit(X_train, y_train)
+
+    study = optuna.create_study(direction=direction)
+    study.optimize(objective, n_trials=n_trials)
+    
+    # Rebuild best pipeline from best params
+    best_params = study.best_params
+    if problem_type == 'classification':
+        if best_model_name == 'Logistic Regression':
+            best_model = LogisticRegression(max_iter=2000, class_weight=cw, **best_params)
+        elif best_model_name == 'Random Forest':
+            best_model = RandomForestClassifier(random_state=42, class_weight=cw, **best_params)
+        elif best_model_name == 'XGBoost':
+            best_model = XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss', **best_params)
+        elif best_model_name == 'SVC':
+            best_model = SVC(probability=True, class_weight=cw, random_state=42, **best_params)
+        else:
+            best_model = KNeighborsClassifier(**best_params)
+    else:
+        if best_model_name == 'Random Forest':
+            best_model = RandomForestRegressor(random_state=42, **best_params)
+        elif best_model_name == 'XGBoost':
+            best_model = XGBRegressor(random_state=42, **best_params)
+        elif best_model_name == 'SVR':
+            best_model = SVR(**best_params)
+        else:
+            best_model = KNeighborsRegressor(**best_params)
+            
+    final_best_pipe = Pipeline(steps=[('preprocessor', preprocessor), (step_name, best_model)])
+    final_best_pipe.fit(X_train, y_train)
+    return final_best_pipe
 
 def get_feature_importances(best_pipe, feature_names, problem_type):
     step_name = 'classifier' if problem_type == 'classification' else 'regressor'
@@ -202,7 +262,7 @@ def run_automl(df, target_col, progress_callback=None):
     scoring_metric = 'accuracy' if problem_type == 'classification' else 'neg_mean_squared_error'
 
     # 1. Model Zoo Evaluation
-    for name, (model, param_grid) in models.items():
+    for name, model in models.items():
         if progress_callback:
             progress_callback(f"Baseline Evaluation: {name}...")
         
@@ -222,26 +282,13 @@ def run_automl(df, target_col, progress_callback=None):
             best_score = mean_cv
             best_model_name = name
             best_model_instance = model
-            best_param_grid = param_grid
 
-    # 2. Hyperparameter Tuning for Best Model
+    # 2. Hyperparameter Tuning for Best Model using Optuna
     if progress_callback:
-        progress_callback(f"Tuning Best Model: {best_model_name}...")
+        progress_callback(f"Optuna Tuning Best Model: {best_model_name}...")
         
-    step_name = 'classifier' if problem_type == 'classification' else 'regressor'
-    best_pipeline = Pipeline(steps=[
-        ('preprocessor', preprocessor),
-        (step_name, best_model_instance)
-    ])
-    
     start_time = time.time()
-    if best_param_grid:
-        search = RandomizedSearchCV(best_pipeline, param_distributions=best_param_grid, n_iter=15, cv=3, scoring=scoring_metric, random_state=42, n_jobs=-1)
-        search.fit(X_train, y_train)
-        final_best_pipe = search.best_estimator_
-    else:
-        final_best_pipe = best_pipeline.fit(X_train, y_train)
-        
+    final_best_pipe = tune_model_optuna(best_model_name, problem_type, X_train, y_train, preprocessor, quality_report.get('is_imbalanced', False), scoring_metric, n_trials=15)
     train_time = time.time() - start_time
     
     # 3. Evaluate Final Model on Test Set
