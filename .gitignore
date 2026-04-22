@@ -2,11 +2,26 @@
 __pycache__/
 *.pyc
 *.pyo
-.env
-venv/
+*.pyd
 
-# Model files (downloaded manually by user)
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# Model files (users download these manually via the app)
 *.pkl
 
 # Streamlit cache
 .streamlit/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
